@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -39,9 +40,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.sm.gamecolor.ScreenUtils
 import com.sm.gamecolor.domain.Line
+import com.sm.gamecolor.view.drawScreen.viewModel.DrawScreenViewModel
 
 @Composable
-fun DrawingScreen() {
+fun DrawingScreen(viewModel: DrawScreenViewModel) {
     val lines = remember {
         mutableStateListOf<Line>()
     }
@@ -89,7 +91,7 @@ fun DrawingScreen() {
     ColorSelectionCard(isExpanded = colorSelectionCardExpanded){ colorSelected ->
         lineColor = colorSelected
     }
-    PincelSelectionCard(isExpanded = colorSelectionCardExpanded){ strokeSelected ->
+    BrushSelectionCard(isExpanded = colorSelectionCardExpanded){ strokeSelected ->
         Log.d("DrawScreen", "DrawingScreen: ${strokeSelected}")
         lineStroke = strokeSelected
     }
@@ -99,11 +101,20 @@ fun DrawingScreen() {
         contentAlignment = Alignment.TopEnd
     ) {
 
-        FloatingActionButton(modifier = Modifier.padding(16.dp), shape = CircleShape, onClick = {
-            colorSelectionCardExpanded = !colorSelectionCardExpanded
-        }) {
-            Icon(Icons.Filled.Edit, "Color selection action floating button")
+        Column {
+            FloatingActionButton(modifier = Modifier.padding(end = 16.dp, top = 5.dp), shape = CircleShape, onClick = {
+                viewModel.goToInitialScreen()
+            }) {
+                Icon(Icons.Filled.ArrowBack, "Color selection action floating button")
+            }
+
+            FloatingActionButton(modifier = Modifier.padding(end = 16.dp, top = 5.dp), shape = CircleShape, onClick = {
+                colorSelectionCardExpanded = !colorSelectionCardExpanded
+            }) {
+                Icon(Icons.Filled.Edit, "Color selection action floating button")
+            }
         }
+
     }
 }
 
@@ -183,7 +194,7 @@ fun ColorSelectionCard(isExpanded: Boolean = false, onColorSelected: (Color) -> 
 }
 
 @Composable
-fun PincelSelectionCard(isExpanded: Boolean, onPincelStrokeSelected: (Dp) -> Unit){
+fun BrushSelectionCard(isExpanded: Boolean, onBrushStrokeSelected: (Dp) -> Unit){
     val yScreenDp = ScreenUtils.getHightDp()
 
     val offSetAnimation: Dp by animateDpAsState(if(isExpanded) yScreenDp - 100.dp else yScreenDp)
@@ -199,12 +210,10 @@ fun PincelSelectionCard(isExpanded: Boolean, onPincelStrokeSelected: (Dp) -> Uni
         Box(modifier = Modifier, contentAlignment = Alignment.BottomCenter){
             Slider(modifier = Modifier.padding(20.dp),  value = sliderPosition, onValueChange = {
                 sliderPosition = it
-                onPincelStrokeSelected(Dp(it * 50))
+                onBrushStrokeSelected(Dp(it * 50))
             })
         }
 
 
     }
-
-
 }

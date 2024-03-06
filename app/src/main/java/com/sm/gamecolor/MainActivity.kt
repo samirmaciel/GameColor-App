@@ -8,8 +8,14 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import com.sm.gamecolor.domain.ScreenSelection
 import com.sm.gamecolor.ui.theme.GameColorTheme
 import com.sm.gamecolor.view.drawScreen.DrawingScreen
+import com.sm.gamecolor.view.drawScreen.initialScreen.InitialScreen
+import com.sm.gamecolor.view.drawScreen.viewModel.DrawScreenViewModel
 
 class MainActivity : ComponentActivity() {
 
@@ -55,7 +61,20 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             GameColorTheme {
-                DrawingScreen()
+
+                val viewModel by viewModels<DrawScreenViewModel>()
+                val state by viewModel.stateUI.collectAsState()
+
+                when(state){
+                    ScreenSelection.INITIAL -> {
+                        InitialScreen(viewModel)
+                    }
+
+                    ScreenSelection.DRAW -> {
+                        DrawingScreen(viewModel)
+                    }
+                }
+
             }
         }
     }
