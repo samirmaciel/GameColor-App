@@ -14,8 +14,10 @@ import androidx.compose.runtime.getValue
 import com.sm.gamecolor.domain.ScreenSelection
 import com.sm.gamecolor.ui.theme.GameColorTheme
 import com.sm.gamecolor.view.drawScreen.DrawingScreen
+import com.sm.gamecolor.view.drawScreen.WaitingScreen
 import com.sm.gamecolor.view.drawScreen.initialScreen.InitialScreen
 import com.sm.gamecolor.view.drawScreen.viewModel.DrawScreenViewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : ComponentActivity() {
 
@@ -32,6 +34,34 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        getBluetoothPermissions()
+
+        setContent {
+            GameColorTheme {
+
+                val viewModel by viewModel<DrawScreenViewModel>()
+                val state by viewModel.navigationState.collectAsState()
+
+                when(state){
+                    ScreenSelection.INITIAL -> {
+                        InitialScreen(viewModel)
+                    }
+
+                    ScreenSelection.DRAW -> {
+                        DrawingScreen(viewModel)
+                    }
+
+                    ScreenSelection.WAITING -> {
+                        WaitingScreen(viewModel)
+                    }
+                }
+
+            }
+        }
+    }
+
+
+    private fun getBluetoothPermissions(){
         val enableBluetoothLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) { /* Not needed */ }
@@ -50,32 +80,13 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-//        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-//            permissionLauncher.launch(
-//                arrayOf(
-//                    Manifest.permission.BLUETOOTH_SCAN,
-//                    Manifest.permission.BLUETOOTH_CONNECT,
-//                )
-//            )
-//        }
-
-        setContent {
-            GameColorTheme {
-
-                val viewModel by viewModels<DrawScreenViewModel>()
-                val state by viewModel.stateUI.collectAsState()
-
-                when(state){
-                    ScreenSelection.INITIAL -> {
-                        InitialScreen(viewModel)
-                    }
-
-                    ScreenSelection.DRAW -> {
-                        DrawingScreen(viewModel)
-                    }
-                }
-
-            }
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            permissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.BLUETOOTH_SCAN,
+                    Manifest.permission.BLUETOOTH_CONNECT,
+                )
+            )
         }
     }
 }
