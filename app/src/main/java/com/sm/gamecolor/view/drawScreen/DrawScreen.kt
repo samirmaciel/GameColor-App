@@ -25,6 +25,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -41,9 +43,13 @@ import androidx.compose.ui.unit.dp
 import com.sm.gamecolor.ScreenUtils
 import com.sm.gamecolor.domain.Line
 import com.sm.gamecolor.view.drawScreen.viewModel.DrawScreenViewModel
+import kotlinx.coroutines.delay
+import javax.security.auth.login.LoginException
 
 @Composable
 fun DrawingScreen(viewModel: DrawScreenViewModel) {
+
+    val deviceConnectionState by viewModel.deviceConnectionState.collectAsState()
     val lines = remember {
         mutableStateListOf<Line>()
     }
@@ -56,7 +62,15 @@ fun DrawingScreen(viewModel: DrawScreenViewModel) {
         mutableStateOf(10.dp)
     }
 
+    when {
+        deviceConnectionState.receivedLine != null -> {
+            deviceConnectionState.receivedLine?.let {
+                lines.add(it)
+            }
+        }
 
+        else -> {}
+    }
 
     Canvas(
         modifier = Modifier
@@ -73,7 +87,9 @@ fun DrawingScreen(viewModel: DrawScreenViewModel) {
                         strokeWidth = lineStroke
                     )
 
+                    viewModel.sendLine(line)
                     lines.add(line)
+
                 }
             }
     ) {
